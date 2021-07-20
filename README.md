@@ -1,0 +1,1 @@
+## Vuex common mutations
