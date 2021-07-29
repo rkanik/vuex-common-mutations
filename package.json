@@ -3,18 +3,30 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "nodemon lib/index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rkanik/vuex-common-mutations.git"
   },
-  "keywords": [],
+  "keywords": [
+    "vuex",
+    "mutautions",
+    "vuex-mutations"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/rkanik/vuex-common-mutations/issues"
   },
-  "homepage": "https://github.com/rkanik/vuex-common-mutations#readme"
+  "homepage": "https://github.com/rkanik/vuex-common-mutations#readme",
+  "dependencies": {
+    "dotty": "^0.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
 }
