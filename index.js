@@ -1,4 +1,3 @@
-
 const deepGet = (input, path) => {
 	let i
 	path = path.split('.');
