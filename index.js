@@ -1,56 +1,109 @@
-const deepGet = (input, path) => {
-	let i
-	path = path.split('.');
-	for (i = 0; i < path.length; i++)
-		input = input[path[i]];
-	return input
+const { get, put } = require('dotty')
+const { isPlainObject: isObject } = require('is-plain-object');
+
+export const mutationType = {
+	SET: "SET",
+	PUSH: "PUSH",
+	RESET: "RESET",
+	UNSHIFT: "UNSHIFT",
+	CONCAT: "CONCAT",
+	UPDATE: "UPDATE",
+	DELETE: "DELETE",
+	MERGE: "MERGE"
 }
 
-const deepSet = (input, path, value) => {
-	let i
-	path = path.split('.');
-	for (i = 0; i < path.length - 1; i++)
-		input = input[path[i]];
-	input[path[i]] = value;
-}
-
-const mutations = {
-	PUSH: (state, [path, item]) => { deepGet(state, path).push(item) },
-	UNSHIFT: (state, [path, item]) => { deepGet(state, path).unshift(item) },
-	RESET: (state, initialState) => mutations.SET(state, initialState),
-	CONCAT: (state, [path, items]) => {
-		let arr = deepGet(state, path).concat(items)
-		deepSet(state, path, arr)
-	},
-	SET: (state, payload) => {
-		Object.entries(payload).forEach(
-			([key, value]) => (state[key] = value)
-		)
-	},
-	DELETE: (state, [path, key, match = 'id']) => {
-		let keys = Array.isArray(key) ? key : [key]
-		deepSet(state, path, deepGet(state, path).filter(
-			el => !keys.includes(el[match])
-		))
-	},
-	UPDATE: (state, [path, data, match = 'id']) => {
-		deepSet(state, path, deepGet(state, path).map(el => {
-			return el[match] === data[match] ? data : el
-		}))
+function SET(state, payload) {
+	if (!isObject(payload)) {
+		throw Error('Payload have to be an object')
 	}
+	Object
+		.entries(payload)
+		.forEach(([path, value]) => {
+			put(state, path, value)
+		})
 }
 
-/**
- *
- * @param  {...'SET'|'RESET'|'PUSH'|'CONCAT'|'UNSHIFT'|'UPDATE'|'DELETE'} names
- * @returns {} Returns with mutations
- */
-var createMutations = (module.exports.createMutations = function (...names) {
-	if (!names.length) return { ...mutations }
+function RESET(state, initialState) {
+	SET(state, initialState)
+}
+
+function PUSH(state, payload) {
+	if (Array.isArray(payload)) {
+		let [path, ...items] = payload
+		let target = get(state, path)
+
+		if (!target || !Array.isArray(target)) {
+			throw Error('Specified state path not found or property is not an array')
+		}
+
+		target.push(...items)
+	}
+	else if (isObject(payload)) {
+		Object.entries(payload).forEach(([path, item]) => {
+			let target = get(state, path)
+
+			if (!target || !Array.isArray(target)) {
+				throw Error('Specified state path not found or property is not an array')
+			}
+
+			let items = Array.isArray(item) ? item : [item]
+			target.push(...items)
+		})
+	}
+	else throw Error('Invalid payload type.')
+}
+
+function UNSHIFT(state, [path, item]) {
+	let target = get(state, path)
+
+	if (!target || !Array.isArray(target)) {
+		throw Error('Specified state path not found or property is not an array')
+	}
+
+	target.unshift(item)
+}
+
+function CONCAT(state, [path, items]) {
+	let target = get(state, path)
+
+	if (!target || !Array.isArray(target)) {
+		throw Error('Specified state path not found or property is not an array')
+	}
+
+	put(state, path, target.concat(items))
+}
+
+function DELETE(state, [path, key, match = 'id']) {
+	let target = get(state, path)
+
+	if (!target || !Array.isArray(target)) {
+		throw Error('Specified state path not found or property is not an array')
+	}
+
+	let keys = Array.isArray(key) ? key : [key]
+	put(state, path, get(state, path).filter(
+		el => !keys.includes(el[match])
+	))
+}
+
+function UPDATE(state, [path, data, match = 'id']) {
+	let target = get(state, path)
+
+	if (!target || !Array.isArray(target)) {
+		throw Error('Specified state path not found or property is not an array')
+	}
+
+	put(state, path, get(state, path).map(el => {
+		return get(el, match) === get(data, match) ? data : el
+	}))
+}
+
+const mutations = { SET, PUSH, RESET, UNSHIFT, CONCAT, DELETE, UPDATE }
+
+exports.createMutations = function (...types) {
+	if (!types.length) return { ...mutations }
 	return Object
 		.keys(mutations)
-		.filter(name => names.includes(name))
+		.filter(name => types.includes(name))
 		.reduce((m, a) => ({ ...m, [a]: mutations[a] }), {})
-});
-
-// export { createMutations }
+};

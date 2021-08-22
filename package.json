@@ -24,7 +24,8 @@
   },
   "homepage": "https://github.com/rkanik/vuex-common-mutations#readme",
   "dependencies": {
-    "dotty": "^0.1.1"
+    "dotty": "^0.1.1",
+    "is-plain-object": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.12"
