@@ -100,7 +100,7 @@ function UPDATE(state, [path, data, match = 'id']) {
 
 const mutations = { SET, PUSH, RESET, UNSHIFT, CONCAT, DELETE, UPDATE }
 
-exports.createMutations = function (...types) {
+export const createMutations = (...types) => {
 	if (!types.length) return { ...mutations }
 	return Object
 		.keys(mutations)
