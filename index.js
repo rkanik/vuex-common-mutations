@@ -114,7 +114,7 @@ export const createGetters = (...getters) => {
 			getters[`$${key}`] = state => state[name]
 		}
 		if (isObject(name)) Object.entries(name).forEach(([key, path]) => {
-			getters[`$${key}`] = state => state[path]
+			getters[`$${key}`] = state => get(state, path)
 		})
 		return getters
 	}, { })
