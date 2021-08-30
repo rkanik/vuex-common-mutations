@@ -111,7 +111,7 @@ export const createMutations = (...types) => {
 export const createGetters = (...getters) => {
 	return getters.reduce((getters, name) => {
 		if (typeof name === 'string') {
-			getters[`$${key}`] = state => state[name]
+			getters[`$${name}`] = state => state[name]
 		}
 		if (isObject(name)) Object.entries(name).forEach(([key, path]) => {
 			getters[`$${key}`] = state => get(state, path)
