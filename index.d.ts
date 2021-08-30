@@ -37,3 +37,9 @@ const actions = {
 ```
 */
 export function createMutations(...types: ['SET' | 'PUSH' | 'UPDATE' | 'UNSHIFT' | 'DELETE' | 'CONCAT' | 'MERGE' | 'RESET'][]): Partial<Mutations>;
+
+/** Handle api request from an action and send resonse to view */
+export function handleAction(apiRequestPromise: Promise<any>, successCallback?: (response: any) => void, errorCallback?: (error: any) => void): [any, any]
+
+/** Generate getters from specified name or key value pairs */
+export function createGetters(...getters: string | {}): {}

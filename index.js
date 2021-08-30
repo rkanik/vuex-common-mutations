@@ -105,5 +105,24 @@ export const createMutations = (...types) => {
 	return Object
 		.keys(mutations)
 		.filter(name => types.includes(name))
-		.reduce((m, a) => ({ ...m, [a]: mutations[a] }), {})
+		.reduce((m, a) => ({ ...m, [a]: mutations[a] }), { })
 };
+
+export const createGetters = (...getters) => {
+	return getters.reduce((getters, name) => {
+		if (typeof name === 'string') {
+			getters[`$${key}`] = state => state[name]
+		}
+		if (isObject(name)) Object.entries(name).forEach(([key, path]) => {
+			getters[`$${key}`] = state => state[path]
+		})
+		return getters
+	}, { })
+}
+
+export const handleAction = async (apiRequestPromise, successCallback, errorCallback) => {
+	let [error, response] = await apiRequestPromise
+	if (!error && typeof successCallback === 'function') successCallback(response)
+	if (error && typeof errorCallback === 'function') errorCallback(error)
+	return [error, response]
+}
