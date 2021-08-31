@@ -42,4 +42,4 @@ export function createMutations(...types: ['SET' | 'PUSH' | 'UPDATE' | 'UNSHIFT'
 export function handleAction(apiRequestPromise: Promise<any>, successCallback?: (response: any) => void, errorCallback?: (error: any) => void): [any, any]
 
 /** Generate getters from specified name or key value pairs */
-export function createGetters(...getters: string | {}): {}
+export function createGetters(...getters: string[] | {}[]): {}
