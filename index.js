@@ -56,14 +56,30 @@ function PUSH(state, payload) {
 	else throw Error('Invalid payload type.')
 }
 
-function UNSHIFT(state, [path, item]) {
-	let target = get(state, path)
+function UNSHIFT(state, payload) {
+	if (Array.isArray(payload)) {
+		let [path, ...items] = payload
+		let target = get(state, path)
 
-	if (!target || !Array.isArray(target)) {
-		throw Error('Specified state path not found or property is not an array')
+		if (!target || !Array.isArray(target)) {
+			throw Error('Specified state path not found or property is not an array')
+		}
+
+		target.unshift(...items)
 	}
+	else if (isObject(payload)) {
+		Object.entries(payload).forEach(([path, item]) => {
+			let target = get(state, path)
 
-	target.unshift(item)
+			if (!target || !Array.isArray(target)) {
+				throw Error('Specified state path not found or property is not an array')
+			}
+
+			let items = Array.isArray(item) ? item : [item]
+			target.unshift(...items)
+		})
+	}
+	else throw Error('Invalid payload type.')
 }
 
 function CONCAT(state, [path, items]) {
@@ -101,14 +117,28 @@ function UPDATE(state, [path, data, match = 'id']) {
 	}))
 }
 
-const mutations = { SET, PUSH, RESET, UNSHIFT, CONCAT, DELETE, UPDATE }
+function MERGE(state, [path, items, match = 'id']) {
+	let target = get(state, path)
+
+	if (!target || !Array.isArray(target)) {
+		throw Error('Specified state path not found or property is not an array')
+	}
+
+	items.forEach(item => {
+		let index = target.findIndex(a => get(a, match) === get(item, match))
+		if (index !== -1) target.splice(index, 1, item)
+		else target.unshift(item)
+	})
+}
+
+const mutations = { SET, PUSH, RESET, UNSHIFT, CONCAT, DELETE, UPDATE, MERGE }
 
 export const createMutations = (...types) => {
 	if (!types.length) return { ...mutations }
 	return Object
 		.keys(mutations)
 		.filter(name => types.includes(name))
-		.reduce((m, a) => ({ ...m, [a]: mutations[a] }), { })
+		.reduce((m, a) => ({ ...m, [a]: mutations[a] }), {})
 };
 
 export const createGetters = (...getters) => {
@@ -120,7 +150,7 @@ export const createGetters = (...getters) => {
 			getters[`$${key}`] = state => get(state, path)
 		})
 		return getters
-	}, { })
+	}, {})
 }
 
 export const handleAction = async (apiRequestPromise, successCallback, errorCallback) => {
