@@ -19,6 +19,9 @@ function SET(state, payload) {
 	Object
 		.entries(payload)
 		.forEach(([path, value]) => {
+			value = typeof value === 'function'
+				? value(get(state, path))
+				: value
 			put(state, path, value)
 		})
 }
