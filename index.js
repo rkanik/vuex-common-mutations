@@ -1,5 +1,5 @@
-const { get, put } = require('dotty')
-const { isPlainObject: isObject } = require('is-plain-object');
+import { get, put } from 'dotty'
+import { isPlainObject as isObject } from 'is-plain-object'
 
 export const mutationType = {
 	SET: "SET",
